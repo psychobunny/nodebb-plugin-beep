@@ -41,8 +41,8 @@
                     winston.info('Default list of Banned Words is enabled. Please go to administration panel to change the list.');
                 }
 
-                Beep.banned_urls = hash.urls || [];
-                Beep.illegal_words = hash.illegal || [];
+                Beep.banned_urls = hash.urls || "";
+                Beep.illegal_words = hash.illegal || "";
             });
         },
         onListChange: function(hash) {
@@ -55,18 +55,18 @@
                 return callback(null, data);
             }
             var postContent = data.postData.content;
-            var badwords = Beep.banned_words.split(',');
+            var badwords = (Beep.banned_words ? Beep.banned_words.split(',') : []);
             badwords = _.map(badwords, function(word) {
                 return _.trim(word);
             });
 
-            var badurls = Beep.banned_urls.split(',');
+            var badurls = (Beep.banned_urls ? Beep.banned_urls.split(',') : []);
             badurls = _.map(badurls, function(word) {
                 return _.trim(word);
             });
 
             for (var w in badwords) {
-                var re = new RegExp(badwords[w], 'ig');
+                var re = new RegExp('\\b'+badwords[w]+'\\b', 'ig');
                 var hidesting = '';
                 for (var i = 0; i < badwords[w].length - 2; i++) {
                     hidesting += '\\*';
@@ -78,18 +78,19 @@
                     postContent = postContent.replace(re, hashword);
                 }
             }
-
+            
             for (var u in badurls) {
-                var re = new RegExp('!?\\[[\\s\\S]*?\\]\\([\\s\\S]*?' + badurls[u] + '[\\s\\S]*?\\)', 'ig')
+                //var re = new RegExp('!?\\[[\\s\\S]*?\\]\\([\\s\\S]*?' + badurls[u] + '[\\s\\S]*?\\)', 'ig')
+                var re = new RegExp(badurls[u], 'ig') //just werks :)
                 postContent = postContent.replace(re, '[link removed]');
             }
-
+            
             data.postData.content = postContent;
             callback(null, data);
         },
         checkForIllegalWords: function(data, callback) {
             var postContent = data.content;
-            var illegal_words = Beep.illegal_words.split(',');
+            var illegal_words = (Beep.illegal_words ? Beep.illegal_words.split(',') : []);
             illegal_words = _.map(illegal_words, function(word) {
                 return _.trim(word);
             });
